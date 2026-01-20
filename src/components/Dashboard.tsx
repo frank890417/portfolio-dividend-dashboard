@@ -357,9 +357,9 @@ const Dashboard: React.FC = () => {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[h.ticker] || '#94a3b8', flexShrink: 0 }}></div>
-                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <span className="ticker-badge" style={{ fontSize: '0.65rem', alignSelf: 'flex-start' }}>{h.ticker}</span>
-                                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{h.name}</span>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <span className="ticker-badge" style={{ fontSize: '0.65rem' }}>{h.ticker}</span>
+                                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{h.name}</span>
                                                         </div>
                                                     </div>
                                                 </td>
