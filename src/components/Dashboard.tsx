@@ -417,9 +417,10 @@ const Dashboard: React.FC = () => {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
                 </section>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 
