@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { myHoldings } from '../data/holdings';
 import { fetchDividends, calculateDividendEvents, type DividendEvent } from '../services/dividendService';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Wallet, Calendar, TrendingUp, Info, Download, Check } from 'lucide-react';
 import { metadata } from '../data/metadata';
 
@@ -299,6 +299,36 @@ const Dashboard: React.FC = () => {
                 </section>
 
                 <section className="middle-column" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Portfolio Composition</h2>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <PieChart>
+                                    <Pie
+                                        data={myHoldings.filter(h => h.quantity > 0).map(h => ({
+                                            name: h.ticker,
+                                            value: filteredEvents.filter(e => e.ticker === h.ticker).reduce((sum, e) => sum + e.netAmount, 0)
+                                        }))}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={50}
+                                        outerRadius={80}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                    >
+                                        {myHoldings.filter(h => h.quantity > 0).map((h, index) => (
+                                            <Cell key={`cell-${index}`} fill={STOCK_COLORS[h.ticker] || fallbackColors[index % fallbackColors.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value: number | undefined) => value ? `$${value.toLocaleString()}` : '$0'} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.7rem', color: '#94a3b8' }}>
+                            Total: ${totalAnnualIncome.toLocaleString()}
+                        </div>
+                    </div>
+
                     <div className="card" style={{ flex: 1.2, display: 'flex', flexDirection: 'column' }}>
                         <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Monthly Summary</h2>
                         <div className="scroll-table">
@@ -318,36 +348,6 @@ const Dashboard: React.FC = () => {
                                             </td>
                                         </tr>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <h3 style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>Holdings Overview</h3>
-                        <div className="scroll-table">
-                            <table style={{ fontSize: '0.75rem' }}>
-                                <thead>
-                                    <tr>
-                                        <th>Ticker</th>
-                                        <th style={{ textAlign: 'right' }}>Yearly (Net)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {myHoldings.filter(h => h.quantity > 0).map(h => {
-                                        const yearly = filteredEvents
-                                            .filter(e => e.ticker === h.ticker)
-                                            .reduce((sum, e) => sum + e.netAmount, 0);
-                                        return (
-                                            <tr key={h.ticker}>
-                                                <td style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[h.ticker] || '#94a3b8' }}></div>
-                                                    <span className="ticker-badge" style={{ fontSize: '0.65rem' }}>{h.ticker}</span>
-                                                </td>
-                                                <td style={{ textAlign: 'right' }}>${yearly.toLocaleString()}</td>
-                                            </tr>
-                                        );
-                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -394,7 +394,7 @@ const Dashboard: React.FC = () => {
                                         <td style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.75rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                                 {e.exDividendDate.split('T')[0].replace(/-/g, '/').slice(5)}
-                                                {new Date(e.exDividendDate) < new Date('2026-01-20') && (
+                                                {!e.isProjection && new Date(e.exDividendDate) < new Date('2026-01-20') && (
                                                     <Check size={12} style={{ color: '#22c55e' }} />
                                                 )}
                                             </div>
