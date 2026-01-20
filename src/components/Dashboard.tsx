@@ -96,13 +96,13 @@ const Dashboard: React.FC = () => {
     });
 
     return (
-        <div className="dashboard-grid" style={{ gap: '0.75rem' }}>
+        <div className="dashboard-grid">
             <header>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Portfolio Dividend Dashboard</h1>
-                    <div className="switch-container" style={{ margin: 0, padding: '0.25rem 0.75rem' }}>
-                        <span className="projection-label" style={{ fontSize: '0.75rem' }}>Show Projections</span>
-                        <label className="switch" style={{ scale: '0.8' }}>
+                    <h1>Portfolio Dividend Dashboard</h1>
+                    <div className="switch-container">
+                        <span className="projection-label">Show Projections</span>
+                        <label className="switch">
                             <input
                                 type="checkbox"
                                 checked={showProjections}
@@ -114,55 +114,55 @@ const Dashboard: React.FC = () => {
                 </div>
             </header>
 
-            <section className="summary-cards" style={{ gap: '0.75rem' }}>
-                <div className="card summary-card" style={{ padding: '0.75rem' }}>
-                    <div className="label" style={{ fontSize: '0.7rem' }}>
+            <section className="summary-cards">
+                <div className="card summary-card">
+                    <div className="label">
                         <Wallet size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
                         Est. Net Annual
                     </div>
-                    <div className="value" style={{ fontSize: '1.25rem' }}>${totalAnnualIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                    <div className="value">${totalAnnualIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                 </div>
-                <div className="card summary-card" style={{ padding: '0.75rem' }}>
-                    <div className="label" style={{ fontSize: '0.7rem' }}>
+                <div className="card summary-card">
+                    <div className="label">
                         <TrendingUp size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
                         Pending (Net)
                     </div>
-                    <div className="value" style={{ fontSize: '1.25rem' }}>${pendingIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                    <div className="value">${pendingIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                 </div>
-                <div className="card summary-card" style={{ padding: '0.75rem', flex: 1.5 }}>
-                    <div className="label" style={{ fontSize: '0.7rem' }}>
+                <div className="card summary-card" style={{ gridColumn: 'span 1' }}>
+                    <div className="label">
                         <Calendar size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
                         Next Payment
                     </div>
-                    <div className="value" style={{ fontSize: '1.15rem', color: '#38bdf8' }}>
+                    <div className="value" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {upcomingEvents[0] ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                            <>
+                                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                                     {myHoldings.find(h => h.ticker === upcomingEvents[0].ticker)?.name || upcomingEvents[0].ticker}
                                 </span>
                                 <span>${upcomingEvents[0].netAmount.toLocaleString()}</span>
                                 <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>({upcomingEvents[0].paymentDate.split('T')[0].slice(5)})</span>
-                            </div>
-                        ) : 'N/A'}
+                            </>
+                        ) : <span style={{ color: '#94a3b8' }}>N/A</span>}
                     </div>
                 </div>
-                <div className="card summary-card" style={{ padding: '0.75rem', background: 'rgba(56, 189, 248, 0.05)', justifyContent: 'center' }}>
-                    <div className="label" style={{ color: '#38bdf8', fontSize: '0.7rem' }}>Status</div>
-                    <div className="value" style={{ fontSize: '1rem', color: '#f8fafc' }}>2026 Portfolio</div>
+                <div className="card summary-card" style={{ background: 'rgba(56, 189, 248, 0.05)', justifyContent: 'center' }}>
+                    <div className="label" style={{ color: '#38bdf8' }}>Portfolio Status</div>
+                    <div className="value" style={{ fontSize: '1.1rem', color: '#f8fafc' }}>2026 Portfolio Ready</div>
                 </div>
             </section>
 
             <div className="top-row">
-                <section className="card chart-container" style={{ display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
-                    <h2 style={{ marginBottom: '0.75rem', fontSize: '0.9rem' }}>Monthly Net Income</h2>
-                    <div style={{ width: '100%', height: '220px', flexShrink: 0 }}>
+                <section className="card chart-container">
+                    <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Monthly Net Income</h2>
+                    <div style={{ width: '100%', height: '240px', flexShrink: 0 }}>
                         <ResponsiveContainer>
-                            <BarChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 9 }} />
-                                <YAxis stroke="#94a3b8" tick={{ fontSize: 9 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                                <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 10 }} />
+                                <YAxis stroke="#94a3b8" tick={{ fontSize: 10 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="amount" radius={[2, 2, 0, 0]} fill="#38bdf8">
+                                <Bar dataKey="amount" radius={[3, 3, 0, 0]} fill="#38bdf8">
                                     {chartData.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={_entry.amount > 0 ? '#38bdf8' : 'rgba(56, 189, 248, 0.1)'} />
                                     ))}
@@ -171,15 +171,15 @@ const Dashboard: React.FC = () => {
                         </ResponsiveContainer>
                     </div>
 
-                    <div style={{ marginTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem' }}>
-                        <h3 style={{ marginBottom: '0.4rem', fontSize: '0.85rem', color: '#94a3b8' }}>Portfolio Holdings</h3>
-                        <div className="scroll-table" style={{ maxHeight: '160px' }}>
-                            <table style={{ fontSize: '0.75rem' }}>
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h3 style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>Portfolio Holdings Overview</h3>
+                        <div className="scroll-table">
+                            <table>
                                 <thead>
                                     <tr>
-                                        <th style={{ padding: '0.3rem' }}>Ticker</th>
-                                        <th style={{ padding: '0.3rem' }}>Quantity</th>
-                                        <th style={{ textAlign: 'right', padding: '0.3rem' }}>Est. Yearly</th>
+                                        <th>Ticker</th>
+                                        <th>Quantity</th>
+                                        <th style={{ textAlign: 'right' }}>Est. Yearly (Net)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -189,9 +189,9 @@ const Dashboard: React.FC = () => {
                                             .reduce((sum, e) => sum + e.netAmount, 0);
                                         return (
                                             <tr key={h.ticker}>
-                                                <td style={{ padding: '0.3rem' }}><span className="ticker-badge" style={{ fontSize: '0.65rem', padding: '1px 4px' }}>{h.ticker}</span></td>
-                                                <td style={{ padding: '0.3rem' }}>{h.quantity} 張</td>
-                                                <td style={{ textAlign: 'right', padding: '0.3rem' }}>${yearly.toLocaleString()}</td>
+                                                <td><span className="ticker-badge">{h.ticker}</span></td>
+                                                <td>{h.quantity} 張</td>
+                                                <td style={{ textAlign: 'right' }}>${yearly.toLocaleString()}</td>
                                             </tr>
                                         );
                                     })}
@@ -201,46 +201,44 @@ const Dashboard: React.FC = () => {
                     </div>
                 </section>
 
-                <section className="card timeline-container" style={{ padding: '0.75rem' }}>
-                    <h2 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Dividend Payment Timeline</h2>
-                    <div className="scroll-table" style={{ maxHeight: '480px' }}>
-                        <table style={{ fontSize: '0.8rem' }}>
+                <section className="card timeline-container">
+                    <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Dividend Payment Timeline</h2>
+                    <div className="scroll-table">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th style={{ textAlign: 'left', padding: '0.3rem' }}>預計付款</th>
-                                    <th style={{ textAlign: 'left', padding: '0.3rem' }}>項目</th>
-                                    <th style={{ textAlign: 'right', padding: '0.3rem' }}>已收/待收</th>
-                                    <th style={{ textAlign: 'right', padding: '0.3rem', color: '#ef4444' }}>健保</th>
-                                    <th style={{ textAlign: 'right', padding: '0.3rem' }}>實付(Net)</th>
-                                    <th style={{ textAlign: 'center', padding: '0.3rem' }}>除息</th>
+                                    <th style={{ textAlign: 'left' }}>預計付款</th>
+                                    <th style={{ textAlign: 'left' }}>項目</th>
+                                    <th style={{ textAlign: 'right' }}>已收 / 待收</th>
+                                    <th style={{ textAlign: 'right' }}>健保</th>
+                                    <th style={{ textAlign: 'right' }}>實付 (Net)</th>
+                                    <th style={{ textAlign: 'center' }}>除息</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {sortedTimelineEvents.map((e, idx) => (
-                                    <tr key={`${e.ticker}-${idx}`}>
-                                        <td style={{ textAlign: 'left', padding: '0.3rem', fontSize: '0.7rem', opacity: 0.8 }}>
-                                            {e.paymentDate.split('T')[0].replace(/-/g, '/').slice(5)}
+                                    <tr key={`${e.ticker}-${idx}`} className={e.status === 'received' ? 'row-received' : ''}>
+                                        <td style={{ textAlign: 'left', fontSize: '0.75rem' }}>{e.paymentDate.split('T')[0].replace(/-/g, '/').slice(5)}</td>
+                                        <td style={{ textAlign: 'left' }}>
+                                            股息 {e.ticker}
+                                            {e.isProjection && <span className="projection-tag">P</span>}
                                         </td>
-                                        <td style={{ textAlign: 'left', padding: '0.3rem' }}>
-                                            {e.ticker}
-                                            {e.isProjection && <span className="projection-tag" style={{ fontSize: '0.5rem', padding: '0 2px' }}>P</span>}
-                                        </td>
-                                        <td style={{ textAlign: 'right', padding: '0.3rem', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                                             <span style={{ color: e.status === 'received' ? '#22c55e' : '#94a3b8', opacity: e.status === 'received' ? 1 : 0.4 }}>
                                                 {e.status === 'received' ? e.amount.toLocaleString() : '0'}
                                             </span>
-                                            <span style={{ margin: '0 3px', opacity: 0.2 }}>/</span>
+                                            <span style={{ margin: '0 4px', opacity: 0.2 }}>/</span>
                                             <span style={{ color: e.status === 'pending' ? '#38bdf8' : '#94a3b8', opacity: e.status === 'pending' ? 1 : 0.4 }}>
                                                 {e.status === 'pending' ? e.amount.toLocaleString() : '0'}
                                             </span>
                                         </td>
-                                        <td style={{ textAlign: 'right', padding: '0.3rem', color: '#ef4444', opacity: e.healthInsuranceFee > 0 ? 0.9 : 0.1, fontSize: '0.7rem' }}>
+                                        <td style={{ textAlign: 'right', color: '#ef4444', opacity: e.healthInsuranceFee > 0 ? 0.9 : 0.1, fontSize: '0.75rem' }}>
                                             {e.healthInsuranceFee > 0 ? `-$${e.healthInsuranceFee.toLocaleString()}` : '0'}
                                         </td>
-                                        <td style={{ textAlign: 'right', padding: '0.3rem', fontWeight: 600, color: '#f8fafc' }}>
+                                        <td style={{ textAlign: 'right', fontWeight: 600, color: '#f8fafc' }}>
                                             ${e.netAmount.toLocaleString()}
                                         </td>
-                                        <td style={{ textAlign: 'center', padding: '0.3rem', opacity: 0.5, fontSize: '0.65rem' }}>
+                                        <td style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.75rem' }}>
                                             {e.exDividendDate.split('T')[0].replace(/-/g, '/').slice(5)}
                                         </td>
                                     </tr>
