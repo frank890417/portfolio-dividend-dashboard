@@ -332,6 +332,41 @@ const Dashboard: React.FC = () => {
                             <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#38bdf8' }}>${averageMonthly.toLocaleString()}</div>
                         </div>
                     </div>
+
+                    {/* Holdings Overview */}
+                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <h3 style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>Portfolio Holdings Overview</h3>
+                        <div className="scroll-table" style={{ maxHeight: '200px' }}>
+                            <table style={{ fontSize: '0.75rem' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th style={{ textAlign: 'center' }}>張數</th>
+                                        <th style={{ textAlign: 'right' }}>Dividend (Net)</th>
+                                        <th style={{ textAlign: 'right' }}>殖利率</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {myHoldings.filter(h => h.quantity > 0).map(h => {
+                                        const yearly = filteredEvents
+                                            .filter(e => e.ticker === h.ticker)
+                                            .reduce((sum, e) => sum + e.netAmount, 0);
+                                        return (
+                                            <tr key={h.ticker}>
+                                                <td style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[h.ticker] || '#94a3b8' }}></div>
+                                                    <span className="ticker-badge" style={{ fontSize: '0.65rem' }}>{h.ticker}</span>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>{h.quantity}</td>
+                                                <td style={{ textAlign: 'right' }}>${yearly.toLocaleString()}</td>
+                                                <td style={{ textAlign: 'right', color: '#94a3b8' }}>-</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
 
 
