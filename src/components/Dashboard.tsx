@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { myHoldings } from '../data/holdings';
 import { fetchDividends, calculateDividendEvents, type DividendEvent } from '../services/dividendService';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Wallet, Calendar, TrendingUp, Info } from 'lucide-react';
+import { Wallet, Calendar, TrendingUp, Info, Download, Check } from 'lucide-react';
 import { metadata } from '../data/metadata';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -37,6 +37,36 @@ const Dashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [events, setEvents] = useState<DividendEvent[]>([]);
     const [showProjections, setShowProjections] = useState(true);
+
+    const exportData = () => {
+        const exportPayload = {
+            metadata: {
+                exportDate: new Date().toISOString(),
+                dataLastUpdated: metadata.lastUpdated,
+                source: metadata.source
+            },
+            summary: {
+                totalAnnualIncome,
+                totalHealthInsurance,
+                receivedIncome,
+                pendingIncome,
+                nextPayment: upcomingEvents[0] || null
+            },
+            holdings: myHoldings,
+            dividendEvents: filteredEvents,
+            monthlyBreakdown: chartData
+        };
+
+        const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dividend-data-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -132,18 +162,41 @@ const Dashboard: React.FC = () => {
                             </a>
                         </div>
                     </div>
-                    <div className="switch-container">
-                        <span className="projection-label">Show Projections</span>
-                        <label className="switch">
-                            <input
-                                type="checkbox"
-                                checked={showProjections}
-                                onChange={(e) => setShowProjections(e.target.checked)}
-                            />
-                            <span className="slider"></span>
-                        </label>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        <button
+                            onClick={exportData}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: 'rgba(56, 189, 248, 0.1)',
+                                border: '1px solid rgba(56, 189, 248, 0.3)',
+                                color: '#38bdf8',
+                                padding: '0.4rem 0.75rem',
+                                borderRadius: '0.5rem',
+                                cursor: 'pointer',
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.2)'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)'}
+                        >
+                            <Download size={14} />
+                            Export Data
+                        </button>
+                        <div className="switch-container">
+                            <span className="projection-label">Show Projections</span>
+                            <label className="switch">
+                                <input
+                                    type="checkbox"
+                                    checked={showProjections}
+                                    onChange={(e) => setShowProjections(e.target.checked)}
+                                />
+                                <span className="slider"></span>
+                            </label>
+                        </div>
                     </div>
-                </div>
             </header>
 
             <section className="summary-cards" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
@@ -226,9 +279,9 @@ const Dashboard: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {chartData.map(d => (
+                                    {chartData.map((d, idx) => (
                                         <tr key={d.name} style={{ opacity: d.amount === 0 ? 0.3 : 1 }}>
-                                            <td>{d.name}</td>
+                                            <td>2026/{idx + 1}月</td>
                                             <td style={{ textAlign: 'right', fontWeight: d.amount > 0 ? 600 : 400, color: d.amount > 0 ? '#38bdf8' : '#94a3b8' }}>
                                                 ${d.amount.toLocaleString()}
                                             </td>
@@ -308,7 +361,12 @@ const Dashboard: React.FC = () => {
                                             ${e.netAmount.toLocaleString()}
                                         </td>
                                         <td style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.75rem' }}>
-                                            {e.exDividendDate.split('T')[0].replace(/-/g, '/').slice(5)}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                {e.exDividendDate.split('T')[0].replace(/-/g, '/').slice(5)}
+                                                {new Date(e.exDividendDate) < new Date('2026-01-20') && (
+                                                    <Check size={12} style={{ color: '#22c55e' }} />
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
