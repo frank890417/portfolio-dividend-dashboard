@@ -249,7 +249,7 @@ const Dashboard: React.FC = () => {
             <div className="top-row">
                 <section className="card chart-column">
                     <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Income Analysis</h2>
-                    
+
                     {/* Charts Side by Side */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                         {/* Bar Chart */}
@@ -263,11 +263,11 @@ const Dashboard: React.FC = () => {
                                         <YAxis stroke="#94a3b8" tick={{ fontSize: 10 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                                         <Tooltip content={<CustomTooltip />} />
                                         {tickers.map((ticker, index) => (
-                                            <Bar 
-                                                key={ticker} 
-                                                dataKey={ticker} 
-                                                stackId="a" 
-                                                fill={STOCK_COLORS[ticker] || fallbackColors[index % fallbackColors.length]} 
+                                            <Bar
+                                                key={ticker}
+                                                dataKey={ticker}
+                                                stackId="a"
+                                                fill={STOCK_COLORS[ticker] || fallbackColors[index % fallbackColors.length]}
                                                 radius={index === tickers.filter(t => chartData.some(d => d[t] > 0)).length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}
                                             />
                                         ))}
@@ -336,26 +336,25 @@ const Dashboard: React.FC = () => {
 
                 <section className="card" style={{ display: 'flex', flexDirection: 'column' }}>
                     <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Monthly Summary</h2>
-                        <div className="scroll-table">
-                            <table style={{ fontSize: '0.75rem' }}>
-                                <thead>
-                                    <tr>
-                                        <th>Month</th>
-                                        <th style={{ textAlign: 'right' }}>Net Amount</th>
+                    <div className="scroll-table">
+                        <table style={{ fontSize: '0.75rem' }}>
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th style={{ textAlign: 'right' }}>Net Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.map((d, idx) => (
+                                    <tr key={d.name} style={{ opacity: d.amount === 0 ? 0.3 : 1 }}>
+                                        <td>2026/{idx + 1}月</td>
+                                        <td style={{ textAlign: 'right', fontWeight: d.amount > 0 ? 600 : 400, color: d.amount > 0 ? '#38bdf8' : '#94a3b8' }}>
+                                            ${d.amount.toLocaleString()}
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {chartData.map((d, idx) => (
-                                        <tr key={d.name} style={{ opacity: d.amount === 0 ? 0.3 : 1 }}>
-                                            <td>2026/{idx + 1}月</td>
-                                            <td style={{ textAlign: 'right', fontWeight: d.amount > 0 ? 600 : 400, color: d.amount > 0 ? '#38bdf8' : '#94a3b8' }}>
-                                                ${d.amount.toLocaleString()}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
