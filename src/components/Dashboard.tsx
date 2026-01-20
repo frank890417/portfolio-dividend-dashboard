@@ -334,80 +334,89 @@ const Dashboard: React.FC = () => {
                     </div>
                 </section>
 
-                <section className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-                    <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Monthly Summary</h2>
-                    <div className="scroll-table">
-                        <table style={{ fontSize: '0.75rem' }}>
-                            <thead>
-                                <tr>
-                                    <th>Month</th>
-                                    <th style={{ textAlign: 'right' }}>Net Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {chartData.map((d, idx) => (
-                                    <tr key={d.name} style={{ opacity: d.amount === 0 ? 0.3 : 1 }}>
-                                        <td>2026/{idx + 1}月</td>
-                                        <td style={{ textAlign: 'right', fontWeight: d.amount > 0 ? 600 : 400, color: d.amount > 0 ? '#38bdf8' : '#94a3b8' }}>
-                                            ${d.amount.toLocaleString()}
+                <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Monthly Summary</h2>
+                        <div className="scroll-table">
+                            <table style={{ fontSize: '0.75rem' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th style={{ textAlign: 'right' }}>Net Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.map((d, idx) => (
+                                        <tr key={d.name} style={{ opacity: d.amount === 0 ? 0.3 : 1 }}>
+                                            <td>2026/{idx + 1}月</td>
+                                            <td style={{ textAlign: 'right', fontWeight: d.amount > 0 ? 600 : 400, color: d.amount > 0 ? '#38bdf8' : '#94a3b8' }}>
+                                                ${d.amount.toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot>
+                                    <tr style={{ borderTop: '1px solid rgba(255,255,255,0.1)', fontWeight: 600 }}>
+                                        <td style={{ paddingTop: '0.5rem' }}>Avg/Month</td>
+                                        <td style={{ textAlign: 'right', color: '#38bdf8', paddingTop: '0.5rem' }}>
+                                            ${averageMonthly.toLocaleString()}
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
-                </section>
 
-                <section className="card timeline-container">
-                    <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Dividend Payment Timeline</h2>
-                    <div className="scroll-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style={{ textAlign: 'left' }}>預計付款</th>
-                                    <th style={{ textAlign: 'left' }}>項目</th>
-                                    <th style={{ textAlign: 'right' }}>已收 / 待收</th>
-                                    <th style={{ textAlign: 'right' }}>健保</th>
-                                    <th style={{ textAlign: 'right' }}>實付 (Net)</th>
-                                    <th style={{ textAlign: 'center' }}>除息</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sortedTimelineEvents.map((e, idx) => (
-                                    <tr key={`${e.ticker}-${idx}`} className={e.status === 'received' ? 'row-received' : ''}>
-                                        <td style={{ textAlign: 'left', fontSize: '0.75rem' }}>{e.paymentDate.split('T')[0].replace(/-/g, '/').slice(5)}</td>
-                                        <td style={{ textAlign: 'left' }}>
-                                            股息 {e.ticker}
-                                            {e.isProjection && <span className="projection-tag">P</span>}
-                                        </td>
-                                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                            <span style={{ color: e.status === 'received' ? '#22c55e' : '#94a3b8', opacity: e.status === 'received' ? 1 : 0.4 }}>
-                                                {e.status === 'received' ? e.amount.toLocaleString() : '0'}
-                                            </span>
-                                            <span style={{ margin: '0 4px', opacity: 0.2 }}>/</span>
-                                            <span style={{ color: e.status === 'pending' ? '#38bdf8' : '#94a3b8', opacity: e.status === 'pending' ? 1 : 0.4 }}>
-                                                {e.status === 'pending' ? e.amount.toLocaleString() : '0'}
-                                            </span>
-                                        </td>
-                                        <td style={{ textAlign: 'right', color: '#ef4444', opacity: e.healthInsuranceFee > 0 ? 0.9 : 0.1, fontSize: '0.75rem' }}>
-                                            {e.healthInsuranceFee > 0 ? `-$${e.healthInsuranceFee.toLocaleString()}` : '0'}
-                                        </td>
-                                        <td style={{ textAlign: 'right', fontWeight: 600, color: '#f8fafc' }}>
-                                            ${e.netAmount.toLocaleString()}
-                                        </td>
-                                        <td style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.75rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                {e.exDividendDate.split('T')[0].replace(/-/g, '/').slice(5)}
-                                                {!e.isProjection && new Date(e.exDividendDate) < new Date('2026-01-20') && (
-                                                    <Check size={12} style={{ color: '#22c55e' }} />
-                                                )}
-                                            </div>
-                                        </td>
+                    <div className="card timeline-container" style={{ flex: 2 }}>
+                        <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Dividend Payment Timeline</h2>
+                        <div className="scroll-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style={{ textAlign: 'left' }}>預計付款</th>
+                                        <th style={{ textAlign: 'left' }}>項目</th>
+                                        <th style={{ textAlign: 'right' }}>已收 / 待收</th>
+                                        <th style={{ textAlign: 'right' }}>健保</th>
+                                        <th style={{ textAlign: 'right' }}>實付 (Net)</th>
+                                        <th style={{ textAlign: 'center' }}>除息</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {sortedTimelineEvents.map((e, idx) => (
+                                        <tr key={`${e.ticker}-${idx}`} className={e.status === 'received' ? 'row-received' : ''}>
+                                            <td style={{ textAlign: 'left', fontSize: '0.75rem' }}>{e.paymentDate.split('T')[0].replace(/-/g, '/').slice(5)}</td>
+                                            <td style={{ textAlign: 'left' }}>
+                                                股息 {e.ticker}
+                                                {e.isProjection && <span className="projection-tag">P</span>}
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                                <span style={{ color: e.status === 'received' ? '#22c55e' : '#94a3b8', opacity: e.status === 'received' ? 1 : 0.4 }}>
+                                                    {e.status === 'received' ? e.amount.toLocaleString() : '0'}
+                                                </span>
+                                                <span style={{ margin: '0 4px', opacity: 0.2 }}>/</span>
+                                                <span style={{ color: e.status === 'pending' ? '#38bdf8' : '#94a3b8', opacity: e.status === 'pending' ? 1 : 0.4 }}>
+                                                    {e.status === 'pending' ? e.amount.toLocaleString() : '0'}
+                                                </span>
+                                            </td>
+                                            <td style={{ textAlign: 'right', color: '#ef4444', opacity: e.healthInsuranceFee > 0 ? 0.9 : 0.1, fontSize: '0.75rem' }}>
+                                                {e.healthInsuranceFee > 0 ? `-$${e.healthInsuranceFee.toLocaleString()}` : '0'}
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontWeight: 600, color: '#f8fafc' }}>
+                                                ${e.netAmount.toLocaleString()}
+                                            </td>
+                                            <td style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.75rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                    {e.exDividendDate.split('T')[0].replace(/-/g, '/').slice(5)}
+                                                    {!e.isProjection && new Date(e.exDividendDate) < new Date('2026-01-20') && (
+                                                        <Check size={12} style={{ color: '#22c55e' }} />
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                 </section>
             </div >
         </div >
