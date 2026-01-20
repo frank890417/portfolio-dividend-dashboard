@@ -334,8 +334,8 @@ const Dashboard: React.FC = () => {
                     </div>
                 </section>
 
-                <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <section style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minHeight: 0 }}>
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Monthly Summary</h2>
                         <div className="scroll-table">
                             <table style={{ fontSize: '0.75rem' }}>
@@ -367,7 +367,7 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="card timeline-container" style={{ flex: 2 }}>
+                    <div className="card timeline-container" style={{ flex: 2, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Dividend Payment Timeline</h2>
                         <div className="scroll-table">
                             <table>

@@ -82,7 +82,7 @@ h1 {
 
 .top-row {
   display: grid;
-  grid-template-columns: 1.5fr 2.5fr;
+  grid-template-columns: 1.6fr 1fr;
   gap: 0.75rem;
   flex: 1;
   min-height: 0;
@@ -228,4 +228,3 @@ input:checked+.slider:before {
     overflow: auto;
   }
 }
-
