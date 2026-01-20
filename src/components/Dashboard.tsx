@@ -98,6 +98,8 @@ const Dashboard: React.FC = () => {
     const totalHealthInsurance = filteredEvents.reduce((sum, p) => sum + p.healthInsuranceFee, 0);
     const receivedIncome = filteredEvents.filter(e => e.status === 'received').reduce((sum, p) => sum + p.netAmount, 0);
     const pendingIncome = totalAnnualIncome - receivedIncome;
+    const projectedIncome = filteredEvents.filter(e => e.isProjection).reduce((sum, p) => sum + p.netAmount, 0);
+    const averageMonthly = Math.floor(totalAnnualIncome / 12);
 
     // Strict next payment: soonest pending event after today (2026-01-20)
     const upcomingEvents = [...filteredEvents]
@@ -197,6 +199,7 @@ const Dashboard: React.FC = () => {
                             </label>
                         </div>
                     </div>
+                </div>
             </header>
 
             <section className="summary-cards" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
@@ -264,6 +267,34 @@ const Dashboard: React.FC = () => {
                                 ))}
                             </BarChart>
                         </ResponsiveContainer>
+                    </div>
+
+                    {/* Color Legend */}
+                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.7rem' }}>
+                            {tickers.filter(t => myHoldings.find(h => h.ticker === t)).map(ticker => (
+                                <div key={ticker} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[ticker] || '#94a3b8' }}></div>
+                                    <span style={{ color: '#94a3b8' }}>{ticker}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* YTD Statistics */}
+                    <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginBottom: '2px' }}>YTD Received</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#22c55e' }}>${receivedIncome.toLocaleString()}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginBottom: '2px' }}>Projected</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#818cf8' }}>${projectedIncome.toLocaleString()}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginBottom: '2px' }}>Avg/Month</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#38bdf8' }}>${averageMonthly.toLocaleString()}</div>
+                        </div>
                     </div>
                 </section>
 
