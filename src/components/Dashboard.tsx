@@ -1,26 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { myHoldings } from '../data/holdings';
 import { fetchDividends, calculateDividendEvents, type DividendEvent } from '../services/dividendService';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Wallet, Calendar, TrendingUp } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Wallet, Calendar, TrendingUp, Info } from 'lucide-react';
+import { metadata } from '../data/metadata';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-        const data = payload[0].payload;
         return (
-            <div className="card" style={{ padding: '0.75rem', border: '1px solid rgba(255,255,255,0.1)', background: '#1e293b', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', minWidth: '180px' }}>
-                <p style={{ fontWeight: 600, marginBottom: '0.75rem', color: '#f8fafc', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.25rem' }}>{label} Net Income</p>
-                <div style={{ fontSize: '0.875rem' }}>
-                    {data.breakdown.map((item: any) => (
-                        <div key={item.ticker} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', color: '#94a3b8', marginBottom: '0.4rem' }}>
-                            <span>{myHoldings.find(h => h.ticker === item.ticker)?.name || item.ticker}</span>
-                            <span style={{ color: '#38bdf8', fontWeight: 500 }}>${item.amount.toLocaleString()}</span>
-                        </div>
-                    ))}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', paddingTop: '0.5rem', display: 'flex', justifyContent: 'space-between', fontWeight: 600, color: '#f8fafc' }}>
-                        <span>Total Monthly</span>
-                        <span>${data.amount.toLocaleString()}</span>
-                    </div>
+            <div className="card custom-tooltip" style={{ padding: '0.75rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <p className="label" style={{ marginBottom: '8px', fontWeight: 600, color: '#f8fafc', fontSize: '0.85rem' }}>{label} Breakdown</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {payload[0].payload.breakdown.map((item: any, idx: number) => {
+                        const stockName = myHoldings.find(h => h.ticker === item.ticker)?.name || '';
+                        return (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: payload.find((p: any) => p.dataKey === item.ticker)?.fill || '#94a3b8' }}></div>
+                                <span style={{ color: '#94a3b8', width: '40px' }}>{item.ticker}</span>
+                                <span style={{ color: '#f8fafc', flex: 1 }}>{stockName}</span>
+                                <span style={{ color: '#38bdf8', fontWeight: 600 }}>${item.amount.toLocaleString()}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+                <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700 }}>
+                    <span style={{ color: '#f8fafc' }}>Total Net</span>
+                    <span style={{ color: '#38bdf8' }}>${payload[0].payload.amount.toLocaleString()}</span>
                 </div>
             </div>
         );
@@ -60,6 +65,7 @@ const Dashboard: React.FC = () => {
     const filteredEvents = showProjections ? events : events.filter(e => !e.isProjection);
 
     const totalAnnualIncome = filteredEvents.reduce((sum, p) => sum + p.netAmount, 0);
+    const totalHealthInsurance = filteredEvents.reduce((sum, p) => sum + p.healthInsuranceFee, 0);
     const receivedIncome = filteredEvents.filter(e => e.status === 'received').reduce((sum, p) => sum + p.netAmount, 0);
     const pendingIncome = totalAnnualIncome - receivedIncome;
 
@@ -68,24 +74,39 @@ const Dashboard: React.FC = () => {
         .filter(e => e.status === 'pending' && new Date(e.paymentDate) >= new Date('2026-01-20'))
         .sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime());
 
+    const tickers = Array.from(new Set(events.map(e => e.ticker)));
+    const STOCK_COLORS: { [key: string]: string } = {
+        '00919': '#38bdf8', // Light Blue
+        '0056': '#818cf8',  // Indigo
+        '00881': '#fbbf24', // Amber
+        '2330': '#34d399',  // Emerald
+        '0050': '#f87171',  // Red
+        '2884': '#c084fc',  // Purple
+        '2892': '#f472b6',  // Pink
+        '00720B': '#94a3b8', // Gray Cloud
+        '00696B': '#a78bfa', // Violet
+    };
+    // Fallback colors for unknown tickers
+    const fallbackColors = ['#facc15', '#60a5fa', '#a78bfa', '#f87171', '#4ade80'];
+
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const chartData = months.map(month => {
         const monthEvents = filteredEvents.filter(e => e.month === month);
-        const breakdown = monthEvents.reduce((acc, e) => {
-            const existing = acc.find(item => item.ticker === e.ticker);
-            if (existing) {
-                existing.amount += e.netAmount;
-            } else {
-                acc.push({ ticker: e.ticker, amount: e.netAmount });
-            }
-            return acc;
-        }, [] as { ticker: string, amount: number }[]);
+        const dataPoint: any = { name: month, amount: 0, breakdown: [] };
 
-        return {
-            name: month,
-            amount: monthEvents.reduce((sum, e) => sum + e.netAmount, 0),
-            breakdown: breakdown.sort((a, b) => b.amount - a.amount)
-        };
+        tickers.forEach(ticker => {
+            const tickerAmount = monthEvents
+                .filter(e => e.ticker === ticker)
+                .reduce((sum, e) => sum + e.netAmount, 0);
+            if (tickerAmount > 0) {
+                dataPoint[ticker] = tickerAmount;
+                dataPoint.amount += tickerAmount;
+                dataPoint.breakdown.push({ ticker, amount: tickerAmount });
+            }
+        });
+
+        dataPoint.breakdown.sort((a: any, b: any) => b.amount - a.amount);
+        return dataPoint;
     });
 
     if (loading) return <div className="loading">Loading Portfolio Data...</div>;
@@ -97,9 +118,20 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="dashboard-grid">
-            <header>
+            <header style={{ marginBottom: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h1>Portfolio Dividend Dashboard</h1>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Portfolio Dividend Dashboard</h1>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
+                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                Last Data Grab: {metadata.lastUpdated}
+                            </span>
+                            <a href={metadata.sopFile} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', color: '#38bdf8', textDecoration: 'none', opacity: 0.8 }} title="View Data Update SOP">
+                                <Info size={12} />
+                                Source Update Info
+                            </a>
+                        </div>
+                    </div>
                     <div className="switch-container">
                         <span className="projection-label">Show Projections</span>
                         <label className="switch">
@@ -114,7 +146,7 @@ const Dashboard: React.FC = () => {
                 </div>
             </header>
 
-            <section className="summary-cards">
+            <section className="summary-cards" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
                 <div className="card summary-card">
                     <div className="label">
                         <Wallet size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
@@ -129,57 +161,92 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="value">${pendingIncome.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                 </div>
-                <div className="card summary-card" style={{ gridColumn: 'span 1' }}>
+                <div className="card summary-card">
+                    <div className="label">
+                        <Wallet size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} color="#ef4444" />
+                        健保總額
+                    </div>
+                    <div className="value" style={{ color: '#ef4444' }}>${totalHealthInsurance.toLocaleString()}</div>
+                </div>
+                <div className="card summary-card">
                     <div className="label">
                         <Calendar size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
                         Next Payment
                     </div>
-                    <div className="value" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="value" style={{ fontSize: '1.25rem' }}>
                         {upcomingEvents[0] ? (
                             <>
-                                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                                    {myHoldings.find(h => h.ticker === upcomingEvents[0].ticker)?.name || upcomingEvents[0].ticker}
+                                <span style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 600 }}>
+                                    {upcomingEvents[0].ticker}
                                 </span>
-                                <span>${upcomingEvents[0].netAmount.toLocaleString()}</span>
-                                <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>({upcomingEvents[0].paymentDate.split('T')[0].slice(5)})</span>
+                                <span style={{ marginLeft: '4px' }}>${upcomingEvents[0].netAmount.toLocaleString()}</span>
                             </>
                         ) : <span style={{ color: '#94a3b8' }}>N/A</span>}
                     </div>
                 </div>
                 <div className="card summary-card" style={{ background: 'rgba(56, 189, 248, 0.05)', justifyContent: 'center' }}>
-                    <div className="label" style={{ color: '#38bdf8' }}>Portfolio Status</div>
-                    <div className="value" style={{ fontSize: '1.1rem', color: '#f8fafc' }}>2026 Portfolio Ready</div>
+                    <div className="label" style={{ color: '#38bdf8' }}>Status</div>
+                    <div className="value" style={{ fontSize: '1rem', color: '#f8fafc' }}>2026 Portfolio</div>
                 </div>
             </section>
 
-            <div className="top-row">
-                <section className="card chart-container">
+            <div className="top-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', gap: '0.75rem' }}>
+                <section className="card chart-column">
                     <h2 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Monthly Net Income</h2>
-                    <div style={{ width: '100%', height: '240px', flexShrink: 0 }}>
+                    <div style={{ width: '100%', height: '360px', flexShrink: 0 }}>
                         <ResponsiveContainer>
                             <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                                 <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 10 }} />
                                 <YAxis stroke="#94a3b8" tick={{ fontSize: 10 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="amount" radius={[3, 3, 0, 0]} fill="#38bdf8">
-                                    {chartData.map((_entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={_entry.amount > 0 ? '#38bdf8' : 'rgba(56, 189, 248, 0.1)'} />
-                                    ))}
-                                </Bar>
+                                {tickers.map((ticker, index) => (
+                                    <Bar
+                                        key={ticker}
+                                        dataKey={ticker}
+                                        stackId="a"
+                                        fill={STOCK_COLORS[ticker] || fallbackColors[index % fallbackColors.length]}
+                                        radius={index === tickers.filter(t => chartData.some(d => d[t] > 0)).length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}
+                                    />
+                                ))}
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
+                </section>
 
-                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <h3 style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>Portfolio Holdings Overview</h3>
+                <section className="middle-column" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className="card" style={{ flex: 1.2, display: 'flex', flexDirection: 'column' }}>
+                        <h2 style={{ marginBottom: '0.5rem', fontSize: '0.9rem' }}>Monthly Summary</h2>
                         <div className="scroll-table">
-                            <table>
+                            <table style={{ fontSize: '0.75rem' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th style={{ textAlign: 'right' }}>Net Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.map(d => (
+                                        <tr key={d.name} style={{ opacity: d.amount === 0 ? 0.3 : 1 }}>
+                                            <td>{d.name}</td>
+                                            <td style={{ textAlign: 'right', fontWeight: d.amount > 0 ? 600 : 400, color: d.amount > 0 ? '#38bdf8' : '#94a3b8' }}>
+                                                ${d.amount.toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h3 style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>Holdings Overview</h3>
+                        <div className="scroll-table">
+                            <table style={{ fontSize: '0.75rem' }}>
                                 <thead>
                                     <tr>
                                         <th>Ticker</th>
-                                        <th>Quantity</th>
-                                        <th style={{ textAlign: 'right' }}>Est. Yearly (Net)</th>
+                                        <th style={{ textAlign: 'right' }}>Yearly (Net)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -189,8 +256,10 @@ const Dashboard: React.FC = () => {
                                             .reduce((sum, e) => sum + e.netAmount, 0);
                                         return (
                                             <tr key={h.ticker}>
-                                                <td><span className="ticker-badge">{h.ticker}</span></td>
-                                                <td>{h.quantity} 張</td>
+                                                <td style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[h.ticker] || '#94a3b8' }}></div>
+                                                    <span className="ticker-badge" style={{ fontSize: '0.65rem' }}>{h.ticker}</span>
+                                                </td>
                                                 <td style={{ textAlign: 'right' }}>${yearly.toLocaleString()}</td>
                                             </tr>
                                         );
