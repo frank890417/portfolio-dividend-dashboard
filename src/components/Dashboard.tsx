@@ -334,16 +334,17 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Holdings Overview */}
-                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    {/* Holdings Overview */}
+                    <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <h3 style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#94a3b8' }}>Portfolio Holdings Overview</h3>
-                        <div className="scroll-table" style={{ maxHeight: '200px' }}>
+                        <div className="scroll-table" style={{ flex: 1, overflowY: 'auto' }}>
                             <table style={{ fontSize: '0.75rem' }}>
                                 <thead>
                                     <tr>
-                                        <th>Ticker</th>
-                                        <th style={{ textAlign: 'center' }}>張數</th>
-                                        <th style={{ textAlign: 'right' }}>Dividend (Net)</th>
-                                        <th style={{ textAlign: 'right' }}>殖利率</th>
+                                        <th style={{ width: '40%' }}>Stock</th>
+                                        <th style={{ textAlign: 'center', width: '15%' }}>張數</th>
+                                        <th style={{ textAlign: 'right', width: '25%' }}>Dividend (Net)</th>
+                                        <th style={{ textAlign: 'right', width: '20%' }}>殖利率</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -353,12 +354,17 @@ const Dashboard: React.FC = () => {
                                             .reduce((sum, e) => sum + e.netAmount, 0);
                                         return (
                                             <tr key={h.ticker}>
-                                                <td style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[h.ticker] || '#94a3b8' }}></div>
-                                                    <span className="ticker-badge" style={{ fontSize: '0.65rem' }}>{h.ticker}</span>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: STOCK_COLORS[h.ticker] || '#94a3b8', flexShrink: 0 }}></div>
+                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <span className="ticker-badge" style={{ fontSize: '0.65rem', alignSelf: 'flex-start' }}>{h.ticker}</span>
+                                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{h.name}</span>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td style={{ textAlign: 'center' }}>{h.quantity}</td>
-                                                <td style={{ textAlign: 'right' }}>${yearly.toLocaleString()}</td>
+                                                <td style={{ textAlign: 'right', fontWeight: 600, color: '#f8fafc' }}>${yearly.toLocaleString()}</td>
                                                 <td style={{ textAlign: 'right', color: '#94a3b8' }}>-</td>
                                             </tr>
                                         );
